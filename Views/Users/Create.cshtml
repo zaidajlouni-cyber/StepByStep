@@ -1,0 +1,126 @@
+﻿@{
+    ViewData["Title"] = "إضافة مستخدم جديد";
+    var parents = ViewBag.Parents as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+<div class="row justify-content-center mt-3" dir="rtl" style="text-align: right;">
+    <div class="col-md-8 col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <strong>إضافة مستخدم جديد إلى المنصة</strong>
+                <a asp-action="Index" class="btn btn-sm btn-light text-primary fw-bold">رجوع للقائمة</a>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الاسم الكامل</label>
+                        <input type="text" name="FullName" class="form-control" placeholder="مثال: أحمد محمد العلي" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">البريد الإلكتروني</label>
+                        <input type="email" name="Email" class="form-control" placeholder="example@stepbystep.edu" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الدور في النظام</label>
+                        <select name="Role" id="roleSelect" class="form-select" required onchange="toggleRoleFields()">
+                            <option value="">-- اختر الدور --</option>
+                            <option value="Student">طالب (Student)</option>
+                            <option value="Teacher">معلم (Teacher)</option>
+                            <option value="Parent">ولي أمر (Parent)</option>
+                            <option value="Attendance">مسؤول الحضور والغياب (Attendance)</option>
+                            <option value="Admin">مدير نظام (Admin)</option>
+                        </select>
+                    </div>
+
+                    <!-- حقول خاصة بالطالب (الصف من الأول للثاني ثانوي + الشعبة + ولي الأمر) -->
+                    <div id="studentFields" class="p-3 mb-3 border rounded bg-light" style="display: none;">
+                        <h6 class="fw-bold text-primary mb-3">بيانات الطالب الدراسية</h6>
+
+                        <div class="mb-3">
+                            <label class="form-label">ولي الأمر المرتبط</label>
+                            <select name="ParentId" id="parentIdSelect" class="form-select">
+                                <option value="">-- اختر ولي الأمر --</option>
+                                @foreach (var p in parents)
+                                {
+                                    <option value="@p.ParentId">@p.FullName</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <label class="form-label">الصف الدراسي</label>
+                                <select name="GradeName" id="gradeSelect" class="form-select">
+                                    <option value="">-- اختر الصف --</option>
+                                    <option value="الصف الأول الأساسي">الصف الأول الأساسي</option>
+                                    <option value="الصف الثاني الأساسي">الصف الثاني الأساسي</option>
+                                    <option value="الصف الثالث الأساسي">الصف الثالث الأساسي</option>
+                                    <option value="الصف الرابع الأساسي">الصف الرابع الأساسي</option>
+                                    <option value="الصف الخامس الأساسي">الصف الخامس الأساسي</option>
+                                    <option value="الصف السادس الأساسي">الصف السادس الأساسي</option>
+                                    <option value="الصف السابع الأساسي">الصف السابع الأساسي</option>
+                                    <option value="الصف الثامن الأساسي">الصف الثامن الأساسي</option>
+                                    <option value="الصف التاسع الأساسي">الصف التاسع الأساسي</option>
+                                    <option value="الصف العاشر الأساسي">الصف العاشر الأساسي</option>
+                                    <option value="الأول ثانوي">الأول ثانوي</option>
+                                    <option value="الثاني ثانوي (توجيهي)">الثاني ثانوي (توجيهي)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">الشعبة</label>
+                                <select name="SectionName" class="form-select">
+                                    <option value="أ">شعبة أ</option>
+                                    <option value="ب">شعبة ب</option>
+                                    <option value="ج">شعبة ج</option>
+                                    <option value="د">شعبة د</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- حقل خاص بولي الأمر -->
+                    <div id="parentFields" class="p-3 mb-3 border rounded bg-light" style="display: none;">
+                        <label class="form-label">رقم هاتف ولي الأمر</label>
+                        <input type="text" name="PhoneNumber" class="form-control" placeholder="مثال: 0790000000" />
+                    </div>
+
+                    <!-- حقل خاص بالمعلم -->
+                    <div id="teacherFields" class="p-3 mb-3 border rounded bg-light" style="display: none;">
+                        <label class="form-label">التخصص الدراسي للمعلم</label>
+                        <input type="text" name="Specialization" class="form-control" placeholder="مثال: رياضيات، لغة عربية، علوم..." />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">كلمة المرور</label>
+                        <input type="text" name="PasswordHash" class="form-control" placeholder="أدخل كلمة المرور" required />
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success px-4">حفظ المستخدم</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">إلغاء</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleRoleFields() {
+        var role = document.getElementById("roleSelect").value.toLowerCase();
+        var studentDiv = document.getElementById("studentFields");
+        var parentDiv = document.getElementById("parentFields");
+        var teacherDiv = document.getElementById("teacherFields");
+
+        studentDiv.style.display = (role === "student") ? "block" : "none";
+        parentDiv.style.display = (role === "parent") ? "block" : "none";
+        teacherDiv.style.display = (role === "teacher") ? "block" : "none";
+
+        document.getElementById("parentIdSelect").required = (role === "student");
+        document.getElementById("gradeSelect").required = (role === "student");
+    }
+</script>

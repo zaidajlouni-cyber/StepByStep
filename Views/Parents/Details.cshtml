@@ -1,0 +1,26 @@
+﻿@model StepByStep.Models.Parent
+
+@{
+    ViewData["Title"] = "تفاصيل ولي الأمر";
+}
+
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    <div class="card shadow-sm col-md-8 mx-auto">
+        <div class="card-header bg-info text-white">
+            <h4>تفاصيل ولي الأمر</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4">رقم ولي الأمر (ID):</dt>
+                <dd class="col-sm-8">@Model.ParentId</dd>
+
+                <dt class="col-sm-4">اسم ولي الأمر:</dt>
+                <dd class="col-sm-8">@ViewBag.UserName</dd>
+            </dl>
+            <div class="d-flex justify-content-between mt-4">
+                <a asp-action="Index" class="btn btn-secondary">العودة للقائمة</a>
+                <a asp-action="Edit" asp-route-id="@Model?.ParentId" class="btn btn-primary">تعديل البيانات</a>
+            </div>
+        </div>
+    </div>
+</div>

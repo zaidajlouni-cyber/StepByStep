@@ -1,0 +1,29 @@
+﻿@model StepByStep.Models.Parent
+
+@{
+    ViewData["Title"] = "تعديل بيانات ولي الأمر";
+}
+
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    <div class="card shadow-sm col-md-8 mx-auto">
+        <div class="card-header bg-warning text-dark">
+            <h4>تعديل بيانات ولي الأمر</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="ParentId" />
+
+                <div class="mb-3">
+                    <label class="form-label">اسم ولي الأمر</label>
+                    <input type="text" class="form-control" value="@ViewBag.UserName" disabled />
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">العودة للقائمة</a>
+                    <button type="submit" class="btn btn-success">حفظ التعديلات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

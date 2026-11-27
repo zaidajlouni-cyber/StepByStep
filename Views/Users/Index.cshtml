@@ -1,0 +1,153 @@
+﻿@model IEnumerable<StepByStep.Models.User>
+@{
+    ViewData["Title"] = "إدارة المستخدمين";
+    var usersList = Model?.ToList() ?? new List<StepByStep.Models.User>();
+    var totalUsers = usersList.Count;
+    var teachersCount = usersList.Count(u => u.Role?.Trim().ToLower() == "teacher");
+    var studentsCount = usersList.Count(u => u.Role?.Trim().ToLower() == "student");
+    var parentsCount = usersList.Count(u => u.Role?.Trim().ToLower() == "parent");
+    string currentSearch = ViewBag.Search as string ?? "";
+    string currentRole = ViewBag.RoleFilter as string ?? "";
+}
+
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="mb-1">إدارة المستخدمين والصلاحيات</h2>
+            <p class="text-muted mb-0">البحث في حسابات النظام وإضافة مستخدمين جدد وتوزيع الطلاب على الصفوف والشعب</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">+ إضافة مستخدم جديد</a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mb-3">@TempData["SuccessMessage"]</div>
+    }
+
+    <!-- بطاقات إحصائيات سريعة -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body py-3">
+                    <div class="text-muted small mb-1">نتائج العرض</div>
+                    <h4 class="fw-bold text-primary mb-0">@totalUsers</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body py-3">
+                    <div class="text-muted small mb-1">المعلمون</div>
+                    <h4 class="fw-bold text-success mb-0">@teachersCount</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body py-3">
+                    <div class="text-muted small mb-1">الطلاب</div>
+                    <h4 class="fw-bold mb-0" style="color: #2563EB;">@studentsCount</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body py-3">
+                    <div class="text-muted small mb-1">أولياء الأمور</div>
+                    <h4 class="fw-bold mb-0" style="color: #0D9488;">@parentsCount</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- شريط البحث والفلترة للأدمن -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">بحث بالاسم، البريد الإلكتروني، أو الصف والشعبة</label>
+                    <input type="text" name="search" value="@currentSearch" class="form-control" placeholder="ابحث هنا... مثال: أحمد، العاشر، شعبة أ" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">تصفية حسب الدور</label>
+                    <select name="roleFilter" class="form-select">
+                        <option value="">جميع الأدوار</option>
+                        <option value="student" selected="@(currentRole == "student")">طالب</option>
+                        <option value="teacher" selected="@(currentRole == "teacher")">معلم</option>
+                        <option value="parent" selected="@(currentRole == "parent")">ولي أمر</option>
+                        <option value="attendance" selected="@(currentRole == "attendance")">مسؤول الحضور</option>
+                        <option value="admin" selected="@(currentRole == "admin")">مدير النظام</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">بحث</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">مسح</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- جدول المستخدمين -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <strong>قائمة مستخدمي النظام</strong>
+        </div>
+        <div class="card-body">
+            @if (usersList.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>الاسم الكامل</th>
+                                <th>البريد الإلكتروني</th>
+                                <th>الدور</th>
+                                <th>الصف والشعبة (للطلاب)</th>
+                                <th>كلمة المرور</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in usersList)
+                            {
+                                var roleLower = user.Role?.Trim().ToLower();
+                                string roleLabel = roleLower switch
+                                {
+                                    "admin" => "مدير النظام",
+                                    "teacher" => "معلم",
+                                    "student" => "طالب",
+                                    "parent" => "ولي أمر",
+                                    "attendance" => "مسؤول الحضور",
+                                    _ => user.Role ?? "-"
+                                };
+
+                                string badgeClass = roleLower switch
+                                {
+                                    "admin" => "bg-dark text-white",
+                                    "teacher" => "bg-info",
+                                    "student" => "bg-success",
+                                    "parent" => "bg-warning",
+                                    "attendance" => "bg-primary text-white",
+                                    _ => "bg-secondary text-white"
+                                };
+
+                                <tr>
+                                    <td>@user.UserId</td>
+                                    <td class="fw-semibold">@user.FullName</td>
+                                    <td>@user.Email</td>
+                                    <td><span class="badge @badgeClass">@roleLabel</span></td>
+                                    <td>@(user.Student?.GradeLevel ?? "-")</td>
+                                    <td><code class="small text-muted">@user.PasswordHash</code></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">لا توجد نتائج مطابقة لبحثك.</p>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,28 @@
+﻿@model StepByStep.Models.Parent
+
+@{
+    ViewData["Title"] = "حذف ولي الأمر";
+}
+
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    <div class="card shadow-sm col-md-8 mx-auto border-danger">
+        <div class="card-header bg-danger text-white">
+            <h4>حذف ولي الأمر</h4>
+        </div>
+        <div class="card-body">
+            <h5 class="text-danger mb-3">هل أنت متأكد من رغبتك في حذف ولي الأمر هذا؟</h5>
+            <dl class="row">
+                <dt class="col-sm-4">اسم ولي الأمر:</dt>
+                <dd class="col-sm-8">@ViewBag.UserName</dd>
+            </dl>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="ParentId" />
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">إلغاء والعودة</a>
+                    <button type="submit" class="btn btn-danger">تأكيد الحذف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,42 @@
+﻿@model IEnumerable<StepByStep.Models.Teacher>
+
+@{
+    ViewData["Title"] = "قائمة المعلمين";
+}
+
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>إدارة المعلمين</h2>
+        <a asp-action="Create" class="btn btn-primary">+ إضافة معلم جديد</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover table-bordered align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>رقم المعلم</th>
+                        <th>اسم المعلم</th>
+                        <th>البريد الإلكتروني</th>
+                        <th style="width: 220px;">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.TeacherId</td>
+                            <td>@(item.TeacherNavigation?.FullName ?? "غير محدد")</td>
+                            <td>@(item.TeacherNavigation?.Email ?? "-")</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.TeacherId" class="btn btn-sm btn-warning">تعديل</a> |
+                                <a asp-action="Details" asp-route-id="@item.TeacherId" class="btn btn-sm btn-info text-white">تفاصيل</a> |
+                                <a asp-action="Delete" asp-route-id="@item.TeacherId" class="btn btn-sm btn-danger">حذف</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

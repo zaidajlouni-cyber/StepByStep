@@ -1,0 +1,148 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "الرئيسية";
+    var userId = Context.Session.GetInt32("UserId");
+    var userRole = Context.Session.GetString("UserRole")?.ToLower();
+    var topBySubject = ViewBag.TopStudentsBySubject as List<StepByStep.Controllers.TopSubjectStudentsVm>
+                       ?? new List<StepByStep.Controllers.TopSubjectStudentsVm>();
+}
+
+<div class="py-4" dir="rtl" style="text-align: right;">
+    <!-- قسم الترحيب الرئيسي -->
+    <div class="card border-0 mb-5 text-white" style="background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 55%, #0D9488 100%); border-radius: 20px !important;">
+        <div class="card-body p-4 p-md-5 text-center">
+            <span class="badge bg-light text-primary mb-3 px-3 py-2">نظام إدارة ومتابعة تعليمية متكامل</span>
+            <h1 class="display-6 fw-bold text-white mb-3">مرحباً بك في منصة StepByStep</h1>
+            <p class="lead mb-4 mx-auto opacity-90" style="max-width: 680px;">
+                نربط المعلم والطالب وولي الأمر في بيئة تعليمية منظمة وسهلة لمتابعة الواجبات اليومية، الحضور والغياب، والتقييمات الأسبوعية خطوة بخطوة.
+            </p>
+
+            @if (!userId.HasValue)
+            {
+                <a asp-controller="Auth" asp-action="Login" class="btn btn-light btn-lg text-primary fw-bold px-5 shadow-sm">
+                    ابدأ الآن - تسجيل الدخول
+                </a>
+            }
+            else
+            {
+                @if (userRole == "teacher")
+                {
+                    <a asp-controller="Teachers" asp-action="Dashboard" class="btn btn-light btn-lg text-primary fw-bold px-5">الانتقال إلى لوحة المعلم</a>
+                }
+                else if (userRole == "student")
+                {
+                    <a asp-controller="Students" asp-action="Index" class="btn btn-light btn-lg text-primary fw-bold px-5">الانتقال إلى بوابة الطالب</a>
+                }
+                else if (userRole == "parent")
+                {
+                    <a asp-controller="Parents" asp-action="Index" class="btn btn-light btn-lg text-primary fw-bold px-5">الانتقال إلى بوابة ولي الأمر</a>
+                }
+                else if (userRole == "attendance")
+                {
+                    <a asp-controller="Attendance" asp-action="Index" class="btn btn-light btn-lg text-primary fw-bold px-5">الانتقال إلى كشف الحضور والغياب</a>
+                }
+                else if (userRole == "admin")
+                {
+                    <a asp-controller="Users" asp-action="Index" class="btn btn-light btn-lg text-primary fw-bold px-5">إدارة النظام والمستخدمين</a>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- بطاقات الأدوار -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-3">
+                <div class="card-body">
+                    <div class="mb-3" style="font-size: 2.3rem;">👨‍🏫</div>
+                    <h5 class="fw-bold mb-2">للمعلمين</h5>
+                    <p class="text-muted small mb-0">
+                        تعميم الواجبات على الصفوف، استلام حلول الطلاب النصية والمصورة، وإضافة التقييمات الأسبوعية بكل سهولة.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-3">
+                <div class="card-body">
+                    <div class="mb-3" style="font-size: 2.3rem;">🎒</div>
+                    <h5 class="fw-bold mb-2">للطلاب</h5>
+                    <p class="text-muted small mb-0">
+                        الاطلاع على الواجبات المطلوبة يومياً، رفع الحلول نصياً أو عبر الصور، ومتابعة التقييمات والملاحظات أولاً بأول.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-3">
+                <div class="card-body">
+                    <div class="mb-3" style="font-size: 2.3rem;">👨‍👩‍👧‍👦</div>
+                    <h5 class="fw-bold mb-2">لأولياء الأمور</h5>
+                    <p class="text-muted small mb-0">
+                        متابعة دقيقة لحضور الأبناء، إشعارات الغياب الفورية، إنجازهم للواجبات المدرسية، ومستواهم الأسبوعي في كل مادة.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- لوحة شرف أفضل 3 طلاب في كل مادة -->
+    @if (topBySubject.Any())
+    {
+        <div class="mt-5">
+            <div class="mb-3">
+                <h3 class="fw-bold mb-1">🏆 أفضل 3 طلاب تقييماً في كل مادة</h3>
+                <p class="text-muted small mb-0">لوحة التميز العامة بناءً على التقييمات الأسبوعية</p>
+            </div>
+
+            <div class="row g-4">
+                @foreach (var item in topBySubject)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary text-white">
+                                <strong>@item.SubjectName</strong>
+                            </div>
+                            <div class="card-body">
+                                @if (item.TopStudents.Any())
+                                {
+                                    <ol class="list-group list-group-numbered list-group-flush">
+                                        @{
+                                            int rank = 1;
+                                        }
+                                        @foreach (var st in item.TopStudents)
+                                        {
+                                            string medal = rank switch
+                                            {
+                                                1 => "🥇",
+                                                2 => "🥈",
+                                                3 => "🥉",
+                                                _ => ""
+                                            };
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-1">
+                                                <div>
+                                                    <span class="ms-1">@medal</span>
+                                                    <span class="fw-semibold">@st.StudentName</span>
+                                                </div>
+                                                <span class="badge bg-success">
+                                                    المجموع: @st.TotalScore (معدل @st.AverageScore)
+                                                </span>
+                                            </li>
+                                            rank++;
+                                        }
+                                    </ol>
+                                }
+                                else
+                                {
+                                    <p class="text-muted small mb-0">لا توجد تقييمات مسجلة لهذه المادة بعد.</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

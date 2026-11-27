@@ -1,0 +1,265 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary-color: #2563EB;
+    --primary-hover: #1D4ED8;
+    --primary-soft: #EFF6FF;
+    --secondary-color: #0D9488;
+    --secondary-hover: #0F766E;
+    --secondary-soft: #F0FDFA;
+    --bg-body: #F4F7FA;
+    --surface-card: #FFFFFF;
+    --text-main: #1E293B;
+    --text-muted: #64748B;
+    --border-color: #E2E8F0;
+    --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.07);
+    --radius-lg: 14px;
+    --radius-md: 10px;
+}
+
+html {
+    font-size: 15px;
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    font-family: 'Cairo', sans-serif !important;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    margin-bottom: 70px;
+    line-height: 1.65;
+}
+
+/* شريط التنقل العلوي */
+.navbar-custom {
+    background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 60%, #0D9488 100%);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.18);
+    padding: 0.75rem 1.25rem;
+}
+
+    .navbar-custom .navbar-brand {
+        color: #FFFFFF !important;
+        font-weight: 800;
+        font-size: 1.35rem;
+        letter-spacing: 0.3px;
+    }
+
+    .navbar-custom .nav-link {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-weight: 600;
+        padding: 0.45rem 0.9rem !important;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin-left: 4px;
+    }
+
+        .navbar-custom .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.16);
+            color: #FFFFFF !important;
+        }
+
+/* العناوين */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* الكروت */
+.card {
+    background-color: var(--surface-card);
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+    .card:hover {
+        box-shadow: var(--shadow-md) !important;
+    }
+
+.card-header {
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 0.95rem 1.25rem !important;
+    font-size: 1.05rem;
+}
+
+    .card-header.bg-primary {
+        background: linear-gradient(135deg, #2563EB, #1D4ED8) !important;
+        border-bottom: none !important;
+    }
+
+    .card-header.bg-dark {
+        background: linear-gradient(135deg, #1E293B, #0F172A) !important;
+        border-bottom: none !important;
+    }
+
+    .card-header.bg-light {
+        background-color: #F8FAFC !important;
+        color: var(--text-main) !important;
+    }
+
+.card-body {
+    padding: 1.35rem !important;
+}
+
+/* الأزرار */
+.btn {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 600;
+    border-radius: var(--radius-md) !important;
+    padding: 0.5rem 1.15rem;
+    transition: all 0.2s ease;
+}
+
+.btn-sm {
+    padding: 0.35rem 0.8rem;
+    border-radius: 8px !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.22);
+}
+
+    .btn-primary:hover {
+        background-color: var(--primary-hover) !important;
+        border-color: var(--primary-hover) !important;
+        transform: translateY(-1px);
+    }
+
+.btn-success {
+    background-color: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+    box-shadow: 0 3px 10px rgba(13, 148, 136, 0.22);
+}
+
+    .btn-success:hover {
+        background-color: var(--secondary-hover) !important;
+        border-color: var(--secondary-hover) !important;
+        transform: translateY(-1px);
+    }
+
+.btn-outline-primary {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color) !important;
+        color: #FFFFFF !important;
+    }
+
+.btn-outline-info {
+    color: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+}
+
+    .btn-outline-info:hover {
+        background-color: var(--secondary-color) !important;
+        color: #FFFFFF !important;
+    }
+
+/* الجداول */
+.table {
+    border-color: var(--border-color) !important;
+    margin-bottom: 0;
+}
+
+    .table thead th {
+        background-color: #F1F5F9 !important;
+        color: #334155 !important;
+        font-weight: 700;
+        border-bottom: 2px solid #CBD5E1 !important;
+        padding: 0.85rem 0.9rem;
+        white-space: nowrap;
+    }
+
+    .table tbody td {
+        padding: 0.85rem 0.9rem;
+        vertical-align: middle;
+        color: var(--text-main);
+    }
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    --bs-table-bg-type: #F8FAFC;
+}
+
+/* حقول الإدخال */
+.form-control, .form-select {
+    border-radius: var(--radius-md) !important;
+    border: 1.5px solid #CBD5E1 !important;
+    padding: 0.55rem 0.85rem;
+    font-family: 'Cairo', sans-serif;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.14) !important;
+    }
+
+.form-label {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.4rem;
+}
+
+/* الشارات Badges */
+.badge {
+    font-weight: 600;
+    padding: 0.45em 0.8em;
+    border-radius: 8px;
+}
+
+    .badge.bg-success {
+        background-color: #D1FAE5 !important;
+        color: #065F46 !important;
+        border: 1px solid #A7F3D0;
+    }
+
+    .badge.bg-warning {
+        background-color: #FEF3C7 !important;
+        color: #92400E !important;
+        border: 1px solid #FDE68A;
+    }
+
+    .badge.bg-info {
+        background-color: var(--primary-soft) !important;
+        color: var(--primary-color) !important;
+        border: 1px solid #BFDBFE;
+    }
+
+/* رسائل التنبيه Alerts */
+.alert {
+    border-radius: var(--radius-md) !important;
+    border: none !important;
+    font-weight: 600;
+    padding: 0.9rem 1.2rem;
+}
+
+.alert-success {
+    background-color: #D1FAE5 !important;
+    color: #065F46 !important;
+}
+
+.alert-danger {
+    background-color: #FEE2E2 !important;
+    color: #991B1B !important;
+}
+
+.alert-warning {
+    background-color: #FEF3C7 !important;
+    color: #92400E !important;
+}
+
+/* الفوتر */
+.footer-custom {
+    background-color: #FFFFFF;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}

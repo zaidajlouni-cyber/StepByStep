@@ -1,0 +1,29 @@
+﻿@model StepByStep.Models.Student
+
+@{
+    ViewData["Title"] = "تفاصيل الطالب";
+}
+
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    <div class="card shadow-sm col-md-8 mx-auto">
+        <div class="card-header bg-info text-white">
+            <h4>تفاصيل الطالب</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4">رقم الطالب (ID):</dt>
+                <dd class="col-sm-8">@Model.StudentId</dd>
+
+                <dt class="col-sm-4">اسم الطالب:</dt>
+                <dd class="col-sm-8">@ViewBag.UserName</dd>
+
+                <dt class="col-sm-4">المرحلة الدراسية:</dt>
+                <dd class="col-sm-8">@Model.GradeLevel</dd>
+            </dl>
+            <div class="d-flex justify-content-between mt-4">
+                <a asp-action="Index" class="btn btn-secondary">العودة للقائمة</a>
+                <a asp-action="Edit" asp-route-id="@Model?.StudentId" class="btn btn-primary">تعديل البيانات</a>
+            </div>
+        </div>
+    </div>
+</div>

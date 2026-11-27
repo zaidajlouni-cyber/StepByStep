@@ -1,0 +1,275 @@
+﻿@using StepByStep.Models
+@{
+    ViewData["Title"] = "لوحة المعلم";
+    var teacherSubjects = ViewBag.TeacherSubjects as List<Subject> ?? new List<Subject>();
+    var students = ViewBag.Students as List<Student> ?? new List<Student>();
+    var grades = ViewBag.Grades as List<string> ?? new List<string>();
+    var homeworkSubmissions = ViewBag.HomeworkSubmissions as List<AttendanceHomework> ?? new List<AttendanceHomework>();
+    var recentBehaviors = ViewBag.RecentBehaviors as List<StudentBehavior> ?? new List<StudentBehavior>();
+    var teacherName = ViewBag.TeacherName as string ?? "المعلم";
+}
+
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>مرحباً بك، @teacherName</h2>
+            <p class="text-muted mb-0">إدارة الصفوف، الطلاب، الواجبات، والتقييمات الأسبوعية الخاصة بموادك</p>
+        </div>
+        <a asp-action="AddEvaluation" class="btn btn-primary">+ إضافة تقييم أسبوعي</a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <!-- المواد المسندة للمعلم -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light">
+            <strong>المواد الدراسية المسندة إليك</strong>
+        </div>
+        <div class="card-body">
+            @if (teacherSubjects.Any())
+            {
+                @foreach (var sub in teacherSubjects)
+                {
+                    <span class="badge bg-info text-dark fs-6 me-2 mb-2 p-2">@sub.SubjectName</span>
+                }
+            }
+            else
+            {
+                <p class="text-muted mb-0">لا توجد مواد مسندة لحسابك حالياً في جدول المواد.</p>
+            }
+        </div>
+    </div>
+
+    <!-- تعيين / تحديث حالة واجب لكل طلاب صف معين -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <strong>تعميم واجب / متابعة واجب على طلاب صف كامل</strong>
+        </div>
+        <div class="card-body">
+            <form asp-action="AssignHomeworkToClass" method="post" class="row g-3">
+                @Html.AntiForgeryToken()
+
+                <div class="col-md-4">
+                    <label class="form-label">اختر الصف:</label>
+                    <select name="gradeLevel" class="form-select" required>
+                        <option value="">-- اختر الصف --</option>
+                        @foreach (var g in grades)
+                        {
+                            <option value="@g">@g</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">اختر المادة (من موادك فقط):</label>
+                    <select name="subjectId" class="form-select" required>
+                        <option value="">-- اختر المادة --</option>
+                        @foreach (var sub in teacherSubjects)
+                        {
+                            <option value="@sub.SubjectId">@sub.SubjectName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">حالة الواجب لطلاب الصف:</label>
+                    <select name="homeworkCompleted" class="form-select">
+                        <option value="false">واجب جديد / قيد المتابعة</option>
+                        <option value="true">مكتمل / تم الإنجاز</option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">نص / وصف الواجب المطلوب:</label>
+                    <textarea name="homeworkDescription" class="form-control" rows="2" placeholder="اكتب تفاصيل الواجب هنا (مثلاً: حل تمارين صفحة 24 من سؤال 1 إلى 5)" required></textarea>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success">حفظ الواجب لجميع طلاب الصف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- إرسال ملاحظة سلوك لولي أمر الطالب (لا تظهر للطالب) -->
+    <div class="card mb-4 shadow-sm border-warning">
+        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+            <strong>📋 إرسال تقرير سلوك لولي أمر الطالب (خاص بولي الأمر ولا يظهر للطالب)</strong>
+        </div>
+        <div class="card-body">
+            <form asp-action="SendBehavior" method="post" class="row g-3">
+                @Html.AntiForgeryToken()
+
+                <div class="col-md-5">
+                    <label class="form-label fw-bold">اختر الطالب:</label>
+                    <select name="studentId" class="form-select" required>
+                        <option value="">-- اختر الطالب --</option>
+                        @foreach (var st in students)
+                        {
+                            var stName = st.StudentNavigation?.FullName ?? $"طالب #{st.StudentId}";
+                            <option value="@st.StudentId">@stName (@st.GradeLevel)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">نوع السلوك:</label>
+                    <select name="behaviorType" class="form-select" required>
+                        <option value="سلوك إيجابي">سلوك إيجابي</option>
+                        <option value="ملاحظة سلوكية">ملاحظة سلوكية</option>
+                        <option value="سلوك سلبي">سلوك سلبي</option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-bold">تفاصيل الملاحظة السلوكية لولي الأمر:</label>
+                    <textarea name="notes" class="form-control" rows="2" placeholder="اكتب ملاحظة السلوك هنا ليطلع عليها ولي الأمر فقط..." required></textarea>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-warning text-dark fw-bold">إرسال السلوك لولي الأمر</button>
+                </div>
+            </form>
+
+            @if (recentBehaviors.Any())
+            {
+                <hr />
+                <h6 class="fw-bold mb-2">آخر ملاحظات السلوك المرسلة من قبلك:</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>الطالب</th>
+                                <th>النوع</th>
+                                <th>الملاحظة</th>
+                                <th>التاريخ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var b in recentBehaviors)
+                            {
+                                <tr>
+                                    <td>@(b.Student?.StudentNavigation?.FullName ?? $"طالب #{b.StudentId}")</td>
+                                    <td><span class="badge bg-secondary">@b.BehaviorType</span></td>
+                                    <td>@b.Notes</td>
+                                    <td>@b.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- متابعة تسليمات وحلول الطلاب للواجبات -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <strong>متابعة تسليمات وحلول الطلاب للواجبات</strong>
+        </div>
+        <div class="card-body">
+            @if (homeworkSubmissions.Any())
+            {
+                <table class="table table-bordered table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>الطالب</th>
+                            <th>الصف</th>
+                            <th>المادة</th>
+                            <th>وصف الواجب</th>
+                            <th>التاريخ</th>
+                            <th>الحالة</th>
+                            <th>حل الطالب (نص / صورة)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in homeworkSubmissions)
+                        {
+                            <tr>
+                                <td>@(item.Student?.StudentNavigation?.FullName ?? $"طالب #{item.StudentId}")</td>
+                                <td>@(item.Student?.GradeLevel ?? "-")</td>
+                                <td>@(item.Subject?.SubjectName ?? $"مادة #{item.SubjectId}")</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.HomeworkDescription) ? "-" : item.HomeworkDescription)</td>
+                                <td>@(item.RecordDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                                <td>
+                                    @if (item.HomeworkCompleted || !string.IsNullOrWhiteSpace(item.SubmissionText) || !string.IsNullOrWhiteSpace(item.SubmissionImagePath))
+                                    {
+                                        <span class="badge bg-success">تم التسليم</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">بانتظار التسليم</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(item.SubmissionText))
+                                    {
+                                        <div class="mb-1"><strong>نص الحل:</strong> @item.SubmissionText</div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(item.SubmissionImagePath))
+                                    {
+                                        <div>
+                                            <a href="@item.SubmissionImagePath" target="_blank" class="btn btn-sm btn-outline-primary">عرض صورة الحل</a>
+                                        </div>
+                                    }
+                                    @if (string.IsNullOrWhiteSpace(item.SubmissionText) && string.IsNullOrWhiteSpace(item.SubmissionImagePath))
+                                    {
+                                        <span class="text-muted">لم يرفع حلاً بعد</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted mb-0">لا توجد واجبات أو تسليمات مسجلة لموادك حتى الآن.</p>
+            }
+        </div>
+    </div>
+
+    <!-- قائمة الطلاب حسب الصفوف -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <strong>الطلاب والصفوف</strong>
+        </div>
+        <div class="card-body">
+            @if (students.Any())
+            {
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>اسم الطالب</th>
+                            <th>الصف</th>
+                            <th>إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var st in students)
+                        {
+                            <tr>
+                                <td>@(st.StudentNavigation?.FullName ?? $"طالب #{st.StudentId}")</td>
+                                <td>@st.GradeLevel</td>
+                                <td>
+                                    <a asp-action="AddEvaluation" class="btn btn-sm btn-outline-primary">إضافة تقييم</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted mb-0">لا يوجد طلاب مسجلون حالياً.</p>
+            }
+        </div>
+    </div>
+</div>

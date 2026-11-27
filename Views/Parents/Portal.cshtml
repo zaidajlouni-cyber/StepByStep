@@ -1,0 +1,241 @@
+﻿@model StepByStep.Models.Parent
+@{
+    ViewData["Title"] = "بوابة ولي الأمر";
+    var homeworks = ViewBag.Homeworks as List<StepByStep.Models.AttendanceHomework> ?? new List<StepByStep.Models.AttendanceHomework>();
+    var evaluations = ViewBag.Evaluations as List<StepByStep.Models.WeeklyEvaluation> ?? new List<StepByStep.Models.WeeklyEvaluation>();
+    var behaviors = ViewBag.Behaviors as List<StepByStep.Models.StudentBehavior> ?? new List<StepByStep.Models.StudentBehavior>();
+    var absentRecords = homeworks.Where(h => h.IsPresent == false).OrderByDescending(h => h.RecordDate).ToList();
+}
+
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    @if (Model == null)
+    {
+        <div class="alert alert-warning">
+            @(ViewBag.ErrorMessage ?? "لا توجد بيانات ولي أمر مرتبطة بهذا الحساب.")
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <div>
+                <h2 class="mb-1">بوابة ولي الأمر</h2>
+                <p class="text-muted mb-0">مرحباً، <strong>@(Model.ParentNavigation?.FullName ?? "ولي الأمر")</strong></p>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.PhoneNumber))
+            {
+                <span class="badge bg-info">رقم التواصل: @Model.PhoneNumber</span>
+            }
+        </div>
+
+        <!-- تنبيه الغياب الفوري للأب -->
+        @if (absentRecords.Any())
+        {
+            <div class="alert alert-danger shadow-sm mb-4">
+                <h5 class="fw-bold mb-2">⚠️ تنبيه غياب للطالب</h5>
+                <p class="mb-2">تم تسجيل غياب للأبناء في السجلات التالية:</p>
+                <ul class="mb-0">
+                    @foreach (var abs in absentRecords)
+                    {
+                        var childName = abs.Student?.StudentNavigation?.FullName ?? $"طالب #{abs.StudentId}";
+                        var subjectName = abs.Subject?.SubjectName ?? "";
+                        var formattedDate = abs.RecordDate.HasValue
+                        ? $"{abs.RecordDate.Value.Year:0000}-{abs.RecordDate.Value.Month:00}-{abs.RecordDate.Value.Day:00}"
+                        : "-";
+                        <li>
+                            <strong>@childName</strong> — غائب بتاريخ <strong>@formattedDate</strong>
+                            @if (!string.IsNullOrWhiteSpace(subjectName))
+                            {
+                                <span class="text-muted">(@subjectName)</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <!-- تقارير سلوك الأبناء (خاصة بولي الأمر فقط) -->
+        <div class="card mb-4 border-warning">
+            <div class="card-header bg-warning text-dark">
+                <strong>📋 تقارير السلوك والملاحظات الخاصة من المعلمين (لا تظهر للطالب)</strong>
+            </div>
+            <div class="card-body">
+                @if (behaviors.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>الطالب</th>
+                                    <th>نوع السلوك</th>
+                                    <th>الملاحظة</th>
+                                    <th>المعلم</th>
+                                    <th>التاريخ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var b in behaviors)
+                                {
+                                    string bBadge = b.BehaviorType.Contains("إيجابي") ? "bg-success"
+                                    : b.BehaviorType.Contains("سلبي") ? "bg-danger"
+                                    : "bg-info text-dark";
+                                    <tr>
+                                        <td class="fw-semibold">@(b.Student?.StudentNavigation?.FullName ?? $"#{b.StudentId}")</td>
+                                        <td><span class="badge @bBadge">@b.BehaviorType</span></td>
+                                        <td>@b.Notes</td>
+                                        <td>@(b.Teacher?.TeacherNavigation?.FullName ?? "معلم")</td>
+                                        <td>@b.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">لا توجد تقارير سلوك مسجلة للأبناء حالياً.</p>
+                }
+            </div>
+        </div>
+
+        <!-- بطاقات الأبناء -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <strong>الأبناء المسجلون</strong>
+            </div>
+            <div class="card-body">
+                @if (Model.Students != null && Model.Students.Any())
+                {
+                    <div class="row g-3">
+                        @foreach (var child in Model.Students)
+                        {
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded bg-light">
+                                    <div class="fw-bold">@(child.StudentNavigation?.FullName ?? $"طالب #{child.StudentId}")</div>
+                                    <div class="text-muted small">الصف والشعبة: <strong>@(child.GradeLevel ?? "-")</strong></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">لا يوجد طلاب مرتبطون بحساب ولي الأمر هذا حالياً.</p>
+                }
+            </div>
+        </div>
+
+        <!-- متابعة الحضور والواجبات -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <strong>سجل الحضور والواجبات المدرسية</strong>
+            </div>
+            <div class="card-body">
+                @if (homeworks.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>الطالب</th>
+                                    <th>المادة</th>
+                                    <th>التاريخ</th>
+                                    <th>الحضور</th>
+                                    <th>الواجب المطلوب</th>
+                                    <th>حالة التسليم</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in homeworks)
+                                {
+                                    var rowDate = item.RecordDate.HasValue
+                                    ? $"{item.RecordDate.Value.Year:0000}-{item.RecordDate.Value.Month:00}-{item.RecordDate.Value.Day:00}"
+                                    : "-";
+                                    <tr>
+                                        <td class="fw-semibold">@(item.Student?.StudentNavigation?.FullName ?? $"#{item.StudentId}")</td>
+                                        <td>@(item.Subject?.SubjectName ?? "-")</td>
+                                        <td>@rowDate</td>
+                                        <td>
+                                            @if (item.IsPresent == false)
+                                            {
+                                                <span class="badge bg-danger">غائب</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">حاضر</span>
+                                            }
+                                        </td>
+                                        <td>@(string.IsNullOrWhiteSpace(item.HomeworkDescription) ? "-" : item.HomeworkDescription)</td>
+                                        <td>
+                                            @if (item.HomeworkCompleted == true)
+                                            {
+                                                <span class="badge bg-success">تم التسليم</span>
+                                            }
+                                            else if (!string.IsNullOrWhiteSpace(item.HomeworkDescription))
+                                            {
+                                                <span class="badge bg-warning">لم يُسلّم بعد</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">-</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">لا توجد سجلات حضور أو واجبات مسجلة للأبناء حالياً.</p>
+                }
+            </div>
+        </div>
+
+        <!-- التقييمات الأسبوعية -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <strong>التقييمات الأسبوعية للأبناء</strong>
+            </div>
+            <div class="card-body">
+                @if (evaluations.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>الطالب</th>
+                                    <th>المادة</th>
+                                    <th>الأسبوع</th>
+                                    <th>الدرجة</th>
+                                    <th>ملاحظات المعلم</th>
+                                    <th>تاريخ التقييم</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var ev in evaluations)
+                                {
+                                    var evalDate = ev.EvaluationDate.HasValue
+                                    ? $"{ev.EvaluationDate.Value.Year:0000}-{ev.EvaluationDate.Value.Month:00}-{ev.EvaluationDate.Value.Day:00}"
+                                    : "-";
+                                    <tr>
+                                        <td class="fw-semibold">@(ev.Student?.StudentNavigation?.FullName ?? $"#{ev.StudentId}")</td>
+                                        <td>@(ev.Subject?.SubjectName ?? "-")</td>
+                                        <td>الأسبوع @ev.WeekNumber</td>
+                                        <td><span class="badge bg-info">@ev.Score</span></td>
+                                        <td>@(string.IsNullOrWhiteSpace(ev.TeacherNotes) ? "-" : ev.TeacherNotes)</td>
+                                        <td>@evalDate</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">لا توجد تقييمات أسبوعية مسجلة للأبناء حالياً.</p>
+                }
+            </div>
+        </div>
+    }
+</div>

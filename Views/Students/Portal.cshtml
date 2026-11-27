@@ -1,0 +1,139 @@
+﻿@using StepByStep.Models
+@model Student?
+
+@{
+    ViewData["Title"] = "بوابة الطالب";
+    var homeworks = ViewBag.Homeworks as List<AttendanceHomework> ?? new List<AttendanceHomework>();
+    var evaluations = ViewBag.Evaluations as List<WeeklyEvaluation> ?? new List<WeeklyEvaluation>();
+}
+
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-warning">@ViewBag.ErrorMessage</div>
+    }
+    else if (Model != null)
+    {
+        <div class="mb-4">
+            <h2>مرحباً بك، @(Model.StudentNavigation?.FullName ?? $"طالب #{Model.StudentId}")</h2>
+            <p class="text-muted mb-0">الصف الدراسي: <strong>@Model.GradeLevel</strong></p>
+        </div>
+
+        <!-- الواجبات والحضور -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <strong>الواجبات ومتابعة الحضور</strong>
+            </div>
+            <div class="card-body">
+                @if (homeworks.Any())
+                {
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>المادة</th>
+                                <th>وصف الواجب</th>
+                                <th>التاريخ</th>
+                                <th>الحضور</th>
+                                <th>حالة الواجب</th>
+                                <th>تسليم الواجب (نص / صورة)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var hw in homeworks)
+                            {
+                                <tr>
+                                    <td>@(hw.Subject?.SubjectName ?? $"مادة #{hw.SubjectId}")</td>
+                                    <td>@(string.IsNullOrWhiteSpace(hw.HomeworkDescription) ? "لا يوجد وصف مضاف" : hw.HomeworkDescription)</td>
+                                    <td>@(hw.RecordDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                                    <td>@(hw.IsPresent ? "حاضر" : "غائب")</td>
+                                    <td>
+                                        @if (hw.HomeworkCompleted)
+                                        {
+                                            <span class="badge bg-success">مكتمل / مُسلّم</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">مطلوب / قيد المتابعة</span>
+                                        }
+                                    </td>
+                                    <td style="min-width: 260px;">
+                                        @if (!string.IsNullOrWhiteSpace(hw.SubmissionText))
+                                        {
+                                            <div class="small text-muted mb-1"><strong>نص التسليم:</strong> @hw.SubmissionText</div>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(hw.SubmissionImagePath))
+                                        {
+                                            <div class="mb-2">
+                                                <a href="@hw.SubmissionImagePath" target="_blank" class="btn btn-sm btn-outline-info">عرض صورة الحل</a>
+                                            </div>
+                                        }
+
+                                        <form asp-action="SubmitHomework" method="post" enctype="multipart/form-data" class="mt-1">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="recordId" value="@hw.RecordId" />
+                                            <textarea name="submissionText" class="form-control form-control-sm mb-1" rows="2" placeholder="اكتب حلك هنا...">@hw.SubmissionText</textarea>
+                                            <input type="file" name="submissionImage" accept="image/*" class="form-control form-control-sm mb-1" />
+                                            <button type="submit" class="btn btn-sm btn-success w-100">تسليم الواجب</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">لا توجد سجلات واجبات أو حضور مسجلة لك حتى الآن.</p>
+                }
+            </div>
+        </div>
+
+        <!-- التقييمات الأسبوعية -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <strong>التقييمات الأسبوعية</strong>
+            </div>
+            <div class="card-body">
+                @if (evaluations.Any())
+                {
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>المادة</th>
+                                <th>رقم الأسبوع</th>
+                                <th>التقييم</th>
+                                <th>ملاحظات المعلم</th>
+                                <th>التاريخ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ev in evaluations)
+                            {
+                                <tr>
+                                    <td>@(ev.Subject?.SubjectName ?? $"مادة #{ev.SubjectId}")</td>
+                                    <td>الأسبوع @ev.WeekNumber</td>
+                                    <td><strong>@ev.Score / 5</strong></td>
+                                    <td>@(string.IsNullOrWhiteSpace(ev.TeacherNotes) ? "-" : ev.TeacherNotes)</td>
+                                    <td>@(ev.EvaluationDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">لا توجد تقييمات أسبوعية مسجلة لك حتى الآن.</p>
+                }
+            </div>
+        </div>
+    }
+</div>

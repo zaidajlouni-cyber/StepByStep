@@ -1,0 +1,106 @@
+﻿@model IEnumerable<StepByStep.Models.Student>
+@{
+    ViewData["Title"] = "تسجيل الحضور والغياب";
+    var grades = ViewBag.Grades as List<string> ?? new List<string>();
+    var selectedGrade = ViewBag.SelectedGrade as string;
+    var selectedDate = ViewBag.SelectedDate as string;
+    var absentStudentIds = ViewBag.AbsentStudentIds as HashSet<int> ?? new HashSet<int>();
+    var studentsList = Model?.ToList() ?? new List<StepByStep.Models.Student>();
+}
+
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    <div class="mb-4">
+        <h2 class="mb-1">كشف الحضور والغياب اليومي</h2>
+        <p class="text-muted mb-0">اختر الصف والتاريخ وحدد الطلاب الغائبين ليصل إشعار فوري لأولياء أمورهم</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mb-3">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger mb-3">@TempData["ErrorMessage"]</div>
+    }
+
+    <!-- فلتر الصف والتاريخ -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label">الصف الدراسي</label>
+                    <select name="gradeLevel" class="form-select">
+                        @foreach (var g in grades)
+                        {
+                            <option value="@g" selected="@(g == selectedGrade)">@g</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">التاريخ</label>
+                    <input type="date" name="date" value="@selectedDate" class="form-control" />
+                </div>
+                <div class="col-md-3 d-grid">
+                    <button type="submit" class="btn btn-primary">عرض طلاب الصف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- جدول الطلاب لتسجيل الغياب -->
+    @if (studentsList.Any())
+    {
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <strong>طلاب الصف: @selectedGrade — بتاريخ @selectedDate</strong>
+                <span class="badge bg-light text-primary">عدد الطلاب: @studentsList.Count</span>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-action="SaveAttendance">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="gradeLevel" value="@selectedGrade" />
+                    <input type="hidden" name="recordDate" value="@selectedDate" />
+
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>اسم الطالب</th>
+                                    <th class="text-center">حالة الحضور (فعّل المربع إذا كان غائباً)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int idx = 1;
+                                }
+                                @foreach (var student in studentsList)
+                                {
+                                    bool isAbsent = absentStudentIds.Contains(student.StudentId);
+                                    <tr>
+                                        <td>@(idx++)</td>
+                                        <td class="fw-semibold">@(student.StudentNavigation?.FullName ?? $"طالب #{student.StudentId}")</td>
+                                        <td class="text-center">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input border-danger" type="checkbox" name="absentIds" value="@student.StudentId" id="abs_@student.StudentId" @(isAbsent ? "checked" : "") style="width: 1.3em; height: 1.3em;" />
+                                                <label class="form-check-label text-danger fw-bold me-2" for="abs_@student.StudentId">
+                                                    غائب اليوم
+                                                </label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg px-5">حفظ كشف الحضور والغياب</button>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">لا يوجد طلاب مسجلون في هذا الصف حالياً.</div>
+    }
+</div>

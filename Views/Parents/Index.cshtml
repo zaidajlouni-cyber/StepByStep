@@ -1,0 +1,49 @@
+﻿@model IEnumerable<StepByStep.Models.Parent>
+@inject StepByStep.Models.StepByStepDbContext _context
+
+@{
+    ViewData["Title"] = "إدارة أولياء الأمور";
+}
+
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>إدارة أولياء الأمور</h2>
+        <a asp-action="Create" class="btn btn-primary">+ إضافة ولي أمر جديد</a>
+    </div>
+
+    <table class="table table-striped table-bordered shadow-sm bg-white text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>رقم ولي الأمر</th>
+                <th>اسم ولي الأمر</th>
+                <th>البريد الإلكتروني</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    var parentUser = _context.Users.FirstOrDefault(u => u.UserId == item.ParentId);
+                    <tr>
+                        <td>@item.ParentId</td>
+                        <td>@(parentUser?.FullName ?? "غير متوفر")</td>
+                        <td>@(parentUser?.Email ?? "غير متوفر")</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.ParentId" class="btn btn-sm btn-warning">تعديل</a> |
+                            <a asp-action="Details" asp-route-id="@item.ParentId" class="btn btn-sm btn-info text-white">تفاصيل</a> |
+                            <a asp-action="Delete" asp-route-id="@item.ParentId" class="btn btn-sm btn-danger">حذف</a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-muted">لا توجد بيانات أولياء أمور مضافة حالياً.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

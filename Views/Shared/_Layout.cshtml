@@ -1,0 +1,143 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    var userId = Context.Session.GetInt32("UserId");
+    var userName = Context.Session.GetString("UserName");
+    var userRole = Context.Session.GetString("UserRole")?.Trim().ToLower();
+}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - StepByStep</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563EB'/%3E%3Cpath d='M32 14L8 25l24 11 20-9.17V39h4V25L32 14zm-14 19.5V44c0 4.5 6.27 8 14 8s14-3.5 14-8V33.5L32 40l-14-6.5z' fill='%23ffffff'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/StepByStep.styles.css" asp-append-version="true" />
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .brand-logo-box {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 65%, #0D9488 100%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
+        }
+    </style>
+</head>
+<body dir="rtl">
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm mb-3">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-primary" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span class="brand-logo-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true">
+                            <path d="M12 3L1 8.5l11 5.5 9-4.5V16h2V8.5L12 3zm-7 9.2V17c0 2.5 3.13 4.5 7 4.5s7-2 7-4.5v-4.8l-7 3.5-7-3.5z" />
+                        </svg>
+                    </span>
+                    <span>StepByStep</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="تبديل القائمة">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1 gap-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">الرئيسية</a>
+                        </li>
+
+                        @if (userRole == "admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Users" asp-action="Index">إدارة المستخدمين</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Students" asp-action="Index">الطلاب</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Teachers" asp-action="Index">المعلمون</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Parents" asp-action="Index">أولياء الأمور</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Attendance" asp-action="Index">الحضور والغياب</a>
+                            </li>
+                        }
+                        else if (userRole == "teacher")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Teachers" asp-action="Dashboard">لوحة المعلم</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Teachers" asp-action="AddEvaluation">إضافة تقييم</a>
+                            </li>
+                        }
+                        else if (userRole == "student")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Students" asp-action="Index">بوابة الطالب</a>
+                            </li>
+                        }
+                        else if (userRole == "parent")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Parents" asp-action="Index">بوابة ولي الأمر</a>
+                            </li>
+                        }
+                        else if (userRole == "attendance")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Attendance" asp-action="Index">تسجيل الحضور والغياب</a>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-2 mt-2 mt-sm-0">
+                        @if (userId.HasValue)
+                        {
+                            <span class="text-muted small fw-semibold">@(userName ?? "مستخدم")</span>
+                            <a class="btn btn-sm btn-outline-danger" asp-controller="Auth" asp-action="Logout">تسجيل الخروج</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-sm btn-primary" asp-controller="Auth" asp-action="Login">تسجيل الدخول</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container pb-4">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted bg-white py-3 mt-auto">
+        <div class="container text-center small">
+            &copy; 2026 - منصة <strong>StepByStep</strong> التعليمية
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
